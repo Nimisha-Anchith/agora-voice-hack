@@ -6,6 +6,7 @@ import {
   DeepgramSTT,
   ExpiresIn,
   MiniMaxTTS,
+  MurfTTS,
   OpenAI,
 } from 'agora-agents';
 import { ClientStartRequest, AgentResponse } from '@/types/conversation';
@@ -48,6 +49,22 @@ function requireEnv(name: string): string {
   const value = process.env[name];
   if (!value) throw new Error(`Missing required environment variable: ${name}`);
   return value;
+}
+
+// TTS: use Murf (BYOK) when NEXT_MURF_API_KEY is set, otherwise Agora-managed MiniMax.
+function buildTts() {
+  const murfKey = process.env.NEXT_MURF_API_KEY;
+  if (murfKey) {
+    return new MurfTTS({
+      key: murfKey,
+      voiceId: process.env.NEXT_MURF_VOICE_ID || 'Ariana',
+      locale: process.env.NEXT_MURF_LOCALE || 'en-US',
+    });
+  }
+  return new MiniMaxTTS({
+    model: 'speech_2_6_turbo',
+    voiceId: 'English_captivating_female1',
+  });
 }
 
 export async function POST(request: NextRequest) {
@@ -159,10 +176,7 @@ export async function POST(request: NextRequest) {
         // }),
       )
       .withTts(
-        new MiniMaxTTS({
-          model: 'speech_2_6_turbo',
-          voiceId: 'English_captivating_female1',
-        }),
+        buildTts(),
         // BYOK — ElevenLabs (set NEXT_ELEVENLABS_API_KEY; optional NEXT_ELEVENLABS_VOICE_ID)
         // new (await import('agora-agents')).ElevenLabsTTS({
         //   key: requireEnv('NEXT_ELEVENLABS_API_KEY'),

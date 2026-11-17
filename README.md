@@ -158,6 +158,8 @@ NEXT_ELEVENLABS_API_KEY=...
 NEXT_ELEVENLABS_VOICE_ID=...
 ```
 
+**Murf TTS** is wired in already: set `NEXT_MURF_API_KEY` (and optionally `NEXT_MURF_VOICE_ID`, `NEXT_MURF_LOCALE`) in `.env.local` and the agent speaks with Murf; leave it empty to use the default MiniMax voice.
+
 ## Repo Map
 
 - `app/api/generate-agora-token/route.ts` — issues RTC + RTM tokens
